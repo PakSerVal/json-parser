@@ -63,7 +63,7 @@ class JsonParserTest extends TestCase {
     }
 
     public function testObject() {
-        $json = '{"foo": {"a": "1", "b": "str", "d": ["1", "2"], "e": {"a": "1"}}, "bar": {"f": "2"}}';
+        $json = '{"foo": {"a": "1", "b": "str", "c": "2.1", "d": ["1", "2"], "e": {"a": "1"}}, "error": {"f": "str"}}';
 
         $typeDefinitions = TypeDefinitions::define()
             ->object('foo', TypeDefinitions::define()
@@ -73,19 +73,32 @@ class JsonParserTest extends TestCase {
                 ->array('d', TypeDefinitions::INTEGER)
                 ->object('e', TypeDefinitions::define()->integer('a'))
             )
-            ->object('bar', TypeDefinitions::define()->integer('f'))
+            ->object('error', TypeDefinitions::define()->integer('f'))
         ;
         $parser = new JsonParser($typeDefinitions);
         $result = $parser->parse($json);
 
-        var_dump($result);
-
         $this->assertEquals(['foo' => [
             'a' => 1,
             'b' => 'str',
-            'c' => [1, 2],
-            'd' => ['a' => 1]
+            'c' => 2.1,
+            'd' => [1, 2],
+            'e' => ['a' => 1]
         ]], $result);
+        $this->assertArrayHasKey('error', $parser->getErrors());
+    }
+
+    public function testPhone() {
+        $json = '{"foo": "8 (950) 288-56-23", "error": "260557"}';
+
+        $typeDefinitions = TypeDefinitions::define()
+            ->phone('foo')
+            ->phone('error')
+        ;
+        $parser = new JsonParser($typeDefinitions);
+        $result = $parser->parse($json);
+
+        $this->assertEquals(['foo' => '79502885623'], $result);
         $this->assertArrayHasKey('error', $parser->getErrors());
     }
 }
