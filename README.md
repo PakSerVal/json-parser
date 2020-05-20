@@ -122,6 +122,6 @@ array(4)
     
     var_dump($result);
 
-    // array(4)
+    // array(1)
     //   'foo' => string(12) "Hello world!"
     ```
